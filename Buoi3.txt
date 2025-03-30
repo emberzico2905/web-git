@@ -1,0 +1,80 @@
+1. INDEX
+* Khái niệm
+- Index (chỉ mục) là một cấu trúc dữ liệu giúp tăng tốc độ truy vấn dữ liệu trong bảng bằng cách tạo ra một “mục lục” trên một hoặc nhiều cột. Khi có index, thay vì quét toàn bộ bảng (Full Table Scan), database có thể tìm dữ liệu nhanh hơn.
+* Nguyên lý hoạt động
+- Index sử dụng cấu trúc B-Tree hoặc Hash Table để lưu trữ và tìm kiếm dữ liệu hiệu quả.
+- Khi truy vấn có điều kiện (WHERE), database sẽ kiểm tra index trước khi đọc dữ liệu thực tế.
+* Ưu điểm
+- Tăng tốc độ truy vấn dữ liệu (SELECT, WHERE, ORDER BY).
+- Giảm tải CPU và bộ nhớ khi xử lý dữ liệu lớn.
+* Nhược điểm
+- Tốn dung lượng bộ nhớ để lưu trữ index.
+- Làm chậm các thao tác INSERT, UPDATE, DELETE vì index cần cập nhật.
+Ví dụ: Tạo Index trên cột email
+ CREATE INDEX idx_email ON Users(email);
+2. TRANSACTION
+* Khái niệm
+- Transaction là một nhóm các thao tác SQL thực hiện cùng nhau. 
+- Nếu tất cả thao tác thành công thì lưu lại (COMMIT), nếu có lỗi thì hoàn tác (ROLLBACK).
+*Nguyên lý hoạt động
+- Transaction tuân theo nguyên tắc ACID:
+  + Atomicity: Toàn bộ transaction thành công hoặc bị hủy bỏ.
+  + Consistency: Dữ liệu trước và sau transaction luôn hợp lệ.
+  + Isolation: Các transaction không ảnh hưởng nhau.
+  + Durability: Dữ liệu được lưu vĩnh viễn khi commit.
+* Ưu điểm
+- Đảm bảo tính nhất quán của dữ liệu.
+- Tránh mất dữ liệu khi có lỗi hệ thống.
+* bNhược điểm
+- Làm chậm hệ thống nếu quá nhiều transaction chạy đồng thời.
+- Có thể gây deadlock nếu không quản lý tốt.
+Ví dụ: Chuyển tiền giữa hai tài khoản
+START TRANSACTION;
+UPDATE Accounts SET balance = balance - 100 WHERE id = 1;
+UPDATE Accounts SET balance = balance + 100 WHERE id = 2;
+COMMIT;
+3. TRIGGER
+* Khái niệm
+- Trigger là một đoạn mã SQL tự động thực thi khi có sự kiện xảy ra trên bảng, chẳng hạn như INSERT, UPDATE, DELETE.
+* Nguyên lý hoạt động
+- Khi dữ liệu trong bảng thay đổi, trigger sẽ tự động chạy trước hoặc sau thao tác (BEFORE hoặc AFTER).
+- Trigger có thể kiểm tra và sửa dữ liệu trước khi ghi vào bảng.
+* Ưu điểm
+- Tự động hóa xử lý dữ liệu.
+- Đảm bảo tính toàn vẹn của dữ liệu mà không cần kiểm tra thủ công.
+* Nhược điểm
+- Khó debug do trigger chạy ẩn.
+- Có thể làm chậm hiệu suất nếu lạm dụng trigger.
+Ví dụ: Lưu lịch sử khi cập nhật giá sản phẩm
+CREATE TRIGGER after_price_update
+AFTER UPDATE ON Products
+FOR EACH ROW
+BEGIN
+    INSERT INTO Product_History(product_id, old_price, new_price, updated_at)
+    VALUES (OLD.id, OLD.price, NEW.price, NOW());
+END;
+4. PROCEDURE (Thủ tục lưu trữ)
+* Khái niệm
+- Stored Procedure là một tập hợp các câu lệnh SQL được lưu trữ trong database và có thể gọi thực thi nhiều lần.
+* Nguyên lý hoạt động
+- Procedure được lưu trữ trong database và thực thi mỗi khi được gọi.
+- Có thể nhận tham số đầu vào (IN), trả về kết quả (OUT).
+* Ưu điểm
+- Giúp code gọn gàng, dễ tái sử dụng.
+- Chạy nhanh hơn vì đã được biên dịch trước.
+- Giảm tải cho ứng dụng bằng cách xử lý dữ liệu trực tiếp trong database.
+* Nhược điểm
+- Khó debug và bảo trì nếu quá phức tạp.
+- Không linh hoạt bằng code ứng dụng (backend).
+Ví dụ: Procedure lấy danh sách sản phẩm theo danh mục
+CREATE PROCEDURE GetProductsByCategory(IN category_id INT)
+BEGIN
+    SELECT * FROM Products WHERE category_id = category_id;
+END;
+
+* Kết luận:
+Index → Giúp truy vấn nhanh hơn.
+Transaction → Đảm bảo dữ liệu không bị lỗi khi có nhiều thao tác liên tiếp.
+Trigger → Tự động chạy khi có sự kiện trong database.
+Procedure → Tái sử dụng các truy vấn SQL phức tạp để tối ưu hiệu suất.
+
